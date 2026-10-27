@@ -1,0 +1,51 @@
+{
+  "name": "dsh-novelai",
+  "version": "0.2.0",
+  "description": "Configurable NovelAI image generation plugin for DeepSeek Harness — supports NAI Diffusion V3, V4, V4.5, and V5 (Full/Medium/Curated), multi-character coordinates, artist presets, Director Reference, Img2Img, Anlas/Battery status, and a Web Settings UI.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xueyue33/dsh-novelai.git"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.2.0-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.4"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "novelai",
+    "nai",
+    "image-generation",
+    "anime"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "slots"
+      ],
+      "platform": "web"
+    }
+  },
+  "license": "MIT"
+}
