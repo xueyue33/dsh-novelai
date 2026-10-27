@@ -1001,20 +1001,22 @@ window.__ModuleLoader__.load({
       );
 
       // 2. Register plugin row config in Installed Plugins ("插件 → 已安装 → dsh-novelai")
-      disposers.push(
-        slots.inject("plugins.row.config", () =>
-          slots.register(
-            {
-              name: "plugins.row.config",
-              key: "dsh-novelai#dsh-novelai"
-            },
-            (slotProps) =>
-              slotProps && slotProps.view === "summary"
-                ? "NovelAI V4.5 / V5 生图参数、API Key 与画师串预设配置"
-                : h(NovelAISettingsPanel, null)
+      for (const rowKey of ["dsh-novelai#dsh-novelai", "dsh-novelai#dsh-novelai-v2"]) {
+        disposers.push(
+          slots.inject("plugins.row.config", () =>
+            slots.register(
+              {
+                name: "plugins.row.config",
+                key: rowKey
+              },
+              (slotProps) =>
+                slotProps && slotProps.view === "summary"
+                  ? "NovelAI V4.5 / V5 生图参数、API Key 与画师串预设配置"
+                  : h(NovelAISettingsPanel, null)
+            )
           )
-        )
-      );
+        );
+      }
 
       ctx.effect(() => () => {
         for (const d of disposers.reverse()) {
