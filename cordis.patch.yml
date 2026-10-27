@@ -1,4 +1,4 @@
 # dsh bundle patch: inserts dsh-novelai into a profile's layer stack.
 - insert:
-    - id: dsh-novelai-v2
-      name: dsh-novelai/v2
+    - id: dsh-novelai
+      name: dsh-novelai

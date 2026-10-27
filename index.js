@@ -799,14 +799,6 @@ export const apply = (ctx, rawConfig) => {
 
             writeLocalState(state);
 
-            try {
-              const forms = ctx.get?.("settings", false);
-              if (forms && forms.writable && Object.keys(settingsPatch).length > 0) {
-                const entryId = ctx.fiber?.entry?.options?.id ?? "dsh-novelai";
-                await forms.update(entryId, settingsPatch);
-              }
-            } catch {}
-
             const cfg = resolveEffectiveConfig(rawConfig);
             sendJson(res, 200, { ok: true, config: serializePublicConfig(cfg) });
             return;
@@ -1358,16 +1350,6 @@ export const apply = (ctx, rawConfig) => {
         }
 
         writeLocalState(state);
-
-        try {
-          const forms = ctx.get?.("settings", false);
-          if (forms && forms.writable && Object.keys(settingsPatch).length > 0) {
-            const entryId = ctx.fiber?.entry?.options?.id ?? "dsh-novelai";
-            await forms.update(entryId, settingsPatch);
-          }
-        } catch (err) {
-          ctx.logger?.warn?.(`dsh-novelai: settings sync skipped: ${String(err?.message || err)}`);
-        }
 
         const eff = resolveEffectiveConfig(rawConfig);
         return {

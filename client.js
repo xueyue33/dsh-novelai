@@ -414,10 +414,29 @@ window.__ModuleLoader__.load({
         loadConfig();
       }, [loadConfig]);
 
-      const updateField = (key, value) => {
-        setForm((prev) => ({ ...prev, [key]: value }));
-        setDirty(true);
-        setMessage(null);
+      const updateField = (key, value, autoSave = false) => {
+        setForm((prev) => {
+          const next = { ...prev, [key]: value };
+          if (autoSave) {
+            fetch("/api/dsh-novelai/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ [key]: value })
+            })
+              .then((r) => r.json())
+              .then((data) => {
+                if (data && data.ok) {
+                  setDirty(false);
+                  setMessage({ type: "ok", text: `✓ 已自动保存 (${key} = ${value})！` });
+                }
+              })
+              .catch(() => {});
+          } else {
+            setDirty(true);
+            setMessage(null);
+          }
+          return next;
+        });
       };
 
       const handleAddPreset = () => {
@@ -674,7 +693,7 @@ window.__ModuleLoader__.load({
                 {
                   className: "dshnai-select",
                   value: form.defaultModel,
-                  onChange: (e) => updateField("defaultModel", e.target.value)
+                  onChange: (e) => updateField("defaultModel", e.target.value, true)
                 },
                 MODEL_OPTIONS.map((opt) => h("option", { key: opt.value, value: opt.value }, opt.label))
               )
@@ -688,7 +707,7 @@ window.__ModuleLoader__.load({
                 {
                   className: "dshnai-select",
                   value: form.defaultResolution,
-                  onChange: (e) => updateField("defaultResolution", e.target.value)
+                  onChange: (e) => updateField("defaultResolution", e.target.value, true)
                 },
                 RESOLUTION_OPTIONS.map((opt) => h("option", { key: opt.value, value: opt.value }, opt.label))
               )
@@ -754,7 +773,7 @@ window.__ModuleLoader__.load({
                 {
                   className: "dshnai-select",
                   value: form.defaultSampler,
-                  onChange: (e) => updateField("defaultSampler", e.target.value)
+                  onChange: (e) => updateField("defaultSampler", e.target.value, true)
                 },
                 SAMPLER_OPTIONS.map((opt) => h("option", { key: opt.value, value: opt.value }, opt.label))
               )
@@ -768,7 +787,7 @@ window.__ModuleLoader__.load({
                 {
                   className: "dshnai-select",
                   value: form.defaultNoiseSchedule,
-                  onChange: (e) => updateField("defaultNoiseSchedule", e.target.value)
+                  onChange: (e) => updateField("defaultNoiseSchedule", e.target.value, true)
                 },
                 SCHEDULE_OPTIONS.map((opt) => h("option", { key: opt.value, value: opt.value }, opt.label))
               )
@@ -780,7 +799,7 @@ window.__ModuleLoader__.load({
             h("input", {
               type: "checkbox",
               checked: Boolean(form.defaultVarietyPlus),
-              onChange: (e) => updateField("defaultVarietyPlus", e.target.checked)
+              onChange: (e) => updateField("defaultVarietyPlus", e.target.checked, true)
             }),
             h("span", null, "默认开启 Variety+ 多样性增强（skip_cfg_above_sigma: 19，仅 V4 / V4.5 支持）")
           )
