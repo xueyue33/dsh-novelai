@@ -200,8 +200,8 @@ function readLocalState() {
 
 function writeLocalState(state) {
   const dir = dataRoot();
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(localStateFile(), JSON.stringify(state, null, 2), "utf8");
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  writeFileSync(localStateFile(), JSON.stringify(state, null, 2), { encoding: "utf8", mode: 0o600 });
 }
 
 function unwrapVolatile(rawConfig) {
@@ -474,6 +474,9 @@ async function generateOneImage(params, cfg, signal) {
   const effectiveCfgRescale = isV5Medium ? 0 : cfgRescale;
 
   const hasImg2Img = referenceBytes && referenceMode === "img2img";
+  if (referenceBytes && referenceMode === "director_reference" && (!isV45 || isV5)) {
+    throw new Error(`NovelAI director_reference 仅支持 V4.5 模型（当前模型 ${model} 不支持，请改用 V4.5 或将 reference_mode 设为 img2img）。`);
+  }
   const hasDirectorRef = referenceBytes && referenceMode === "director_reference" && isV45 && !isV5;
   const action = hasImg2Img ? "img2img" : "generate";
 
@@ -547,17 +550,15 @@ async function generateOneImage(params, cfg, signal) {
       use_coords: useCoords,
       use_order: true
     };
-    if (!isV5Medium) {
-      parameters.v4_negative_prompt = {
-        caption: {
-          base_caption: finalUc,
-          char_captions: v4CharNegatives
-        },
-        legacy_uc: false,
-        use_coords: false,
-        use_order: false
-      };
-    }
+    parameters.v4_negative_prompt = {
+      caption: {
+        base_caption: isV5Medium ? "" : finalUc,
+        char_captions: v4CharNegatives
+      },
+      legacy_uc: false,
+      use_coords: false,
+      use_order: false
+    };
   } else {
     parameters.sm = false;
     parameters.sm_dyn = false;
@@ -1128,7 +1129,7 @@ export const apply = (ctx, rawConfig) => {
           sampler: model === "nai-diffusion-5-full-medium" ? "k_euler_ancestral" : sampler,
           noise_schedule: noiseSchedule,
           full_prompt: fullPrompt,
-          negative_prompt: finalUc,
+          negative_prompt: model === "nai-diffusion-5-full-medium" ? "" : finalUc,
           duration_ms: Date.now() - startedAt,
           images
         };
